@@ -18,6 +18,9 @@ docker-build: Dockerfile Gopkg.lock
 test:
 	go test -v
 
+clean:
+	rm -rf bin vendor
+
 tag:
 	git tag $(VERSION)
 
@@ -33,4 +36,4 @@ Gopkg.toml:
 Dockerfile: Dockerfile.tmpl
 	NAME=$(NAME) sh $< > $@
 
-.PHONEY: build static-build docker-build test tag
+.PHONEY: build static-build docker-build test clean tag
