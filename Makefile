@@ -12,7 +12,7 @@ build: $(SRCS) vendor
 static-build: $(SRCS)
 	go build -a -tags netgo -installsuffix netgo -ldflags="$(LDFLAGS) -extldflags '-static'" -o bin/$(NAME)
 
-docker-build: Dockerfile Gopkg.lock
+docker-build: Dockerfile Gopkg.toml Gopkg.lock
 	docker build -t $(PROJECT)/$(NAME):$(VERSION) .
 
 docker-push:
