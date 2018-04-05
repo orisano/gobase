@@ -19,7 +19,7 @@ docker-push:
 	docker push $(PROJECT)/$(NAME):$(VERSION)
 
 test:
-	go test -v
+	go test -v ./...
 
 clean:
 	rm -rf bin vendor
