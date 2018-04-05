@@ -15,6 +15,9 @@ static-build: $(SRCS)
 docker-build: Dockerfile Gopkg.lock
 	docker build -t $(PROJECT)/$(NAME):$(VERSION) .
 
+docker-push:
+	docker push $(PROJECT)/$(NAME):$(VERSION)
+
 test:
 	go test -v
 
@@ -36,4 +39,4 @@ Gopkg.toml:
 Dockerfile: Dockerfile.tmpl
 	NAME=$(NAME) sh $< > $@
 
-.PHONEY: build static-build docker-build test clean tag
+.PHONEY: build static-build docker-build docker-push test clean tag
