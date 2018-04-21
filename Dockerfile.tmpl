@@ -1,4 +1,4 @@
-cat << EOF
+cat << __EOF__
 FROM golang:1.10-alpine3.7 AS build
 
 ENV DEP_VERSION 0.4.1
@@ -16,4 +16,4 @@ RUN make static-build
 FROM scratch
 COPY --from=build /go/src/${NAME}/bin/${NAME} /bin/${NAME}
 ENTRYPOINT ["/bin/${NAME}"]
-EOF
+__EOF__
