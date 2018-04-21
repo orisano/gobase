@@ -9,7 +9,7 @@ LDFLAGS := -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 build: $(SRCS) vendor
 	go build -ldflags="$(LDFLAGS)" -o bin/$(NAME)
 
-static-build: $(SRCS)
+static-build: $(SRCS) vendor
 	CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo -ldflags="$(LDFLAGS) -extldflags '-static'" -o bin/$(NAME)
 
 docker-build: Dockerfile Gopkg.toml Gopkg.lock
