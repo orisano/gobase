@@ -42,7 +42,7 @@ Gopkg.lock: Gopkg.toml
 	dep ensure -no-vendor
 
 Dockerfile: Dockerfile.tmpl
-	NAME=$(NAME) sh $< > $@
+	DIR=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
 
 .PHONEY: build static-build docker-build test test/small test/medium test/large clean tag
 
