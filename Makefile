@@ -30,14 +30,14 @@ clean:
 tag:
 	git tag $(VERSION)
 
-vendor: Gopkg.toml
-	dep ensure
-
-Gopkg.lock:
-	dep ensure
+vendor: Gopkg.toml Gopkg.lock
+	dep ensure -vendor-only
 
 Gopkg.toml:
 	dep init
+
+Gopkg.lock:
+	dep ensure -no-vendor
 
 Dockerfile: Dockerfile.tmpl
 	NAME=$(NAME) sh $< > $@
