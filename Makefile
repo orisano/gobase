@@ -9,6 +9,8 @@ LDFLAGS := -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 default: build
 
 init: .initialized
+
+.initialized:
 	@touch .initialized
 	@rm -rf .git
 	go get -u github.com/golang/dep/cmd/dep
@@ -59,4 +61,6 @@ Dockerfile: Dockerfile.tmpl
 .cli.deps: Gopkg.toml
 	depinst -make > $@
 
+ifneq ($(MAKECMDGOALS),init)
 include .cli.deps
+endif
