@@ -18,8 +18,14 @@ docker-build: Dockerfile Gopkg.toml Gopkg.lock
 docker-push:
 	docker push $(PROJECT)/$(NAME):$(VERSION)
 
-test:
-	go test -v ./...
+test test/small:
+	go test -v -run='^Test([^M][^_]|[^L][^_])' ./...
+
+test/medium:
+	go test -v -run='^TestM_' ./...
+
+test/large:
+	go test -v -run='^TestL_' ./...
 
 clean:
 	rm -rf bin vendor
