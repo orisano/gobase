@@ -38,7 +38,7 @@ vendor: Gopkg.toml Gopkg.lock
 Gopkg.toml:
 	dep init
 
-Gopkg.lock:
+Gopkg.lock: Gopkg.toml
 	dep ensure -no-vendor
 
 Dockerfile: Dockerfile.tmpl

@@ -5,6 +5,7 @@ ENV DEP_VERSION 0.4.1
 
 RUN apk add -q --no-progress --no-cache git make ca-certificates
 RUN wget -q -O /usr/local/bin/dep https://github.com/golang/dep/releases/download/v\${DEP_VERSION}/dep-linux-amd64 && chmod +x /usr/local/bin/dep
+RUN wget -q -O /usr/local/bin/depinst https://github.com/orisano/depinst/releases/download/1.0.0/depinst-linux-amd64 && chmod +x /usr/local/bin/depinst
 
 WORKDIR /go/src/${NAME}
 COPY Gopkg.lock Gopkg.toml ./
