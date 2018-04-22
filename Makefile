@@ -6,10 +6,12 @@ REVISION := $(shell git rev-parse --short HEAD)
 SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go')
 LDFLAGS := -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
-build: $(SRCS) vendor
+build: $(SRCS) vendor cli
+	go generate
 	go build -ldflags="$(LDFLAGS)" -o bin/$(NAME)
 
-static-build: $(SRCS) vendor
+static-build: $(SRCS) vendor cli
+	go generate
 	CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo -ldflags="$(LDFLAGS) -extldflags '-static'" -o bin/$(NAME)
 
 docker-build: Dockerfile Gopkg.toml Gopkg.lock
@@ -43,3 +45,8 @@ Dockerfile: Dockerfile.tmpl
 	NAME=$(NAME) sh $< > $@
 
 .PHONEY: build static-build docker-build test test/small test/medium test/large clean tag
+
+.cli.deps: Gopkg.toml
+	depinst -make > $@
+
+include .cli.deps
