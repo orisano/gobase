@@ -6,6 +6,16 @@ REVISION := $(shell git rev-parse --short HEAD)
 SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go')
 LDFLAGS := -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
+default: build
+
+init: .initialized
+	@touch .initialized
+	@rm -rf .git
+	go get -u github.com/golang/dep/cmd/dep
+	go get -u github.com/orisano/depinst
+	git init
+	dep init
+
 build: $(SRCS) vendor cli
 	go generate
 	go build -ldflags="$(LDFLAGS)" -o bin/$(NAME)
@@ -44,7 +54,7 @@ Gopkg.lock: Gopkg.toml
 Dockerfile: Dockerfile.tmpl
 	DIR=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
 
-.PHONEY: build static-build docker-build test test/small test/medium test/large clean tag
+.PHONEY: default init build static-build docker-build test test/small test/medium test/large clean tag
 
 .cli.deps: Gopkg.toml
 	depinst -make > $@
