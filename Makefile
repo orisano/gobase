@@ -42,4 +42,4 @@ Gopkg.toml:
 Dockerfile: Dockerfile.tmpl
 	NAME=$(NAME) sh $< > $@
 
-.PHONEY: build static-build docker-build test clean tag
+.PHONEY: build static-build docker-build test test/small test/medium test/large clean tag
