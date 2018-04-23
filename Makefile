@@ -1,10 +1,10 @@
 PROJECT := project
 NAME := name
 VERSION := 0.0.0
-REVISION := $(shell git rev-parse --short HEAD)
+REVISION = $(shell git rev-parse --short HEAD 2>/dev/null)
+LDFLAGS = -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
 SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go')
-LDFLAGS := -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
 default: build
 
