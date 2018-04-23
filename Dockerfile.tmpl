@@ -14,7 +14,8 @@ RUN dep ensure -vendor-only
 COPY . .
 RUN make static-build
 
-FROM scratch
+FROM alpine:3.7
+RUN apk add -q --no-progress --no-cache ca-certificates
 COPY --from=build /go/src/${DIR}/bin/${NAME} /bin/${NAME}
 ENTRYPOINT ["/bin/${NAME}"]
 __EOF__
