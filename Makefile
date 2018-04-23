@@ -47,9 +47,6 @@ tag:
 vendor: Gopkg.toml Gopkg.lock
 	dep ensure -vendor-only
 
-Gopkg.toml:
-	dep init
-
 Gopkg.lock: Gopkg.toml
 	dep ensure -no-vendor
 
