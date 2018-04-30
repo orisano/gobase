@@ -2,7 +2,7 @@ PROJECT := project
 NAME := name
 VERSION := 0.0.0
 REVISION = $(shell git rev-parse --short HEAD 2>/dev/null)
-LDFLAGS = -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
+GO_LD_FLAGS = -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
 SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go' -print)
 
@@ -20,11 +20,11 @@ init: .initialized
 
 build: $(SRCS) vendor cli
 	go generate
-	go build -ldflags="$(LDFLAGS)" -o bin/$(NAME)
+	go build -ldflags="$(GO_LD_FLAGS)" -o bin/$(NAME)
 
 static-build: $(SRCS) vendor cli
 	go generate
-	CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo -ldflags="$(LDFLAGS) -extldflags '-static'" -o bin/$(NAME)
+	CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo -ldflags="$(GO_LD_FLAGS) -extldflags '-static'" -o bin/$(NAME)
 
 docker-build: Dockerfile Gopkg.toml Gopkg.lock
 	docker build -t $(PROJECT)/$(NAME):$(VERSION) .
