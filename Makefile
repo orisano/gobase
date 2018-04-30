@@ -4,7 +4,7 @@ VERSION := 0.0.0
 REVISION = $(shell git rev-parse --short HEAD 2>/dev/null)
 LDFLAGS = -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
-SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go')
+SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go' -print)
 
 default: build
 
@@ -43,6 +43,9 @@ clean:
 
 tag:
 	git tag $(VERSION)
+
+fmt:
+	goimports -w $(SRCS)
 
 vendor: Gopkg.toml Gopkg.lock
 	dep ensure -vendor-only
