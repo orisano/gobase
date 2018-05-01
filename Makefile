@@ -62,5 +62,5 @@ Dockerfile: Dockerfile.tmpl
 	depinst -make > $@
 
 ifneq ($(MAKECMDGOALS),init)
-include .cli.deps
+-include .cli.deps
 endif
