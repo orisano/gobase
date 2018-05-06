@@ -19,11 +19,11 @@ init: .initialized
 	dep init
 
 build: $(SRCS) vendor cli
-	go generate
+	go generate ./...
 	go build -ldflags="$(GO_LD_FLAGS)" -o bin/$(NAME)
 
 static-build: $(SRCS) vendor cli
-	go generate
+	go generate ./...
 	CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo -ldflags="$(GO_LD_FLAGS) -extldflags '-static'" -o bin/$(NAME)
 
 docker-build: Dockerfile Gopkg.toml Gopkg.lock
