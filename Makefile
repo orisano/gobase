@@ -8,15 +8,17 @@ SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go' -prin
 
 default: build
 
-init: .initialized
-
-.initialized:
-	@touch .initialized
-	@rm -rf .git
+bootstrap:
+	go get -u golang.org/x/tools/cmd/goimports
 	go get -u github.com/golang/dep/cmd/dep
 	go get -u github.com/orisano/depinst
-	git init
+
+init: bootstrap
 	dep init
+
+world: init
+	rm -rf .git
+	git init
 
 build: $(SRCS) vendor cli
 	go generate ./...
@@ -56,11 +58,11 @@ Gopkg.lock: Gopkg.toml
 Dockerfile: Dockerfile.tmpl
 	DIR=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
 
-.PHONEY: default init build static-build docker-build test test/small test/medium test/large clean tag
+.PHONEY: default bootstrap init world build static-build docker-build test test/small test/medium test/large clean tag
 
 .cli.deps: Gopkg.toml
 	depinst -make > $@
 
-ifneq ($(MAKECMDGOALS),init)
+ifeq (,$(findstring $(MAKECMDGOALS),init world bootstrap))
 -include .cli.deps
 endif
