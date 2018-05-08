@@ -6,6 +6,8 @@ GO_LD_FLAGS = -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
 SRCS := $(shell git ls-files '*.go')
 
+export PATH := $(PWD)/bin:$(PATH)
+
 default: build
 
 bootstrap:
