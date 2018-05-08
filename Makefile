@@ -4,7 +4,7 @@ VERSION := 0.0.0
 REVISION = $(shell git rev-parse --short HEAD 2>/dev/null)
 GO_LD_FLAGS = -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
-SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go' -print)
+SRCS := $(shell git ls-files '*.go')
 
 default: build
 
