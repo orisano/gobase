@@ -1,4 +1,5 @@
 // ref: https://gist.github.com/enricofoltran/10b4a980cd07cb02836f70a4ab3e72d7
+// ref: https://medium.com/@matryer/how-i-write-go-http-services-after-seven-years-37c208122831
 package main
 
 import (
@@ -24,73 +25,82 @@ const (
 	requestIDKey key = 0
 )
 
-var (
-	listenAddr string
-	healthy    int32
-)
-
-func main() {
-	flag.StringVar(&listenAddr, "l", ":5000", "server listen address")
-	flag.Parse()
-
-	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
-	logger.Println("server is starting...")
-	logger.Printf("version:  %s", Version)
-	logger.Printf("revision: %s", Revision)
-
-	router := http.NewServeMux()
-	router.Handle("/healthz", healthz())
-
-	nextRequestID := func() string {
-		return strconv.FormatInt(time.Now().UnixNano(), 10)
-	}
-
-	server := &http.Server{
-		Addr:         listenAddr,
-		Handler:      tracing(nextRequestID)(logging(logger)(router)),
-		ErrorLog:     logger,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  15 * time.Second,
-	}
-
-	done := make(chan bool)
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-
-	go func() {
-		<-quit
-		logger.Println("server is shutting down...")
-		atomic.StoreInt32(&healthy, 0)
-
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		server.SetKeepAlivesEnabled(false)
-		if err := server.Shutdown(ctx); err != nil {
-			logger.Fatalf("could not gracefully shutdown the server: %v", err)
-		}
-		close(done)
-	}()
-
-	logger.Println("server is ready to handle requests at", listenAddr)
-	atomic.StoreInt32(&healthy, 1)
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		logger.Fatalf("could not listen on %s: %v", listenAddr, err)
-	}
-
-	<-done
-	logger.Println("server stopped")
+type server struct {
+	logger  *log.Logger
+	healthy int32
 }
 
-func healthz() http.Handler {
+func (s *server) healthz() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if atomic.LoadInt32(&healthy) == 1 {
+		if atomic.LoadInt32(&s.healthy) == 1 {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 		w.WriteHeader(http.StatusServiceUnavailable)
 	})
+}
+
+func (s *server) routes() http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("/healthz", s.healthz())
+	return mux
+}
+
+func (s *server) ListenAndServe(addr string) {
+	s.logger.Println("server is starting...")
+
+	nextRequestID := func() string {
+		return strconv.FormatInt(time.Now().UnixNano(), 10)
+	}
+
+	handler := s.routes()
+
+	srv := &http.Server{
+		Addr:         addr,
+		Handler:      compose(logging(s.logger), tracing(nextRequestID))(handler),
+		ErrorLog:     s.logger,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  15 * time.Second,
+	}
+
+	done := make(chan struct{})
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+
+	go func() {
+		<-quit
+		s.logger.Println("server is shutting down...")
+		atomic.StoreInt32(&s.healthy, 0)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		srv.SetKeepAlivesEnabled(false)
+		if err := srv.Shutdown(ctx); err != nil {
+			s.logger.Fatalf("could not gracefully shutdown the server: %v", err)
+		}
+		close(done)
+	}()
+
+	s.logger.Println("server is ready to handle requests at", addr)
+	atomic.StoreInt32(&s.healthy, 1)
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		s.logger.Fatalf("could not listen on %s: %v", addr, err)
+	}
+
+	<-done
+	s.logger.Println("server stopped")
+}
+
+func compose(middlewares ...func(http.Handler) http.Handler) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		handler := next
+		for _, middleware := range middlewares {
+			handler = middleware(handler)
+		}
+		return handler
+	}
 }
 
 func logging(logger *log.Logger) func(http.Handler) http.Handler {
@@ -120,4 +130,18 @@ func tracing(nextRequestID func() string) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}
+}
+
+func main() {
+	listenAddr := flag.String("l", ":5000", "server listen address")
+	flag.Parse()
+
+	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
+	logger.Printf("version:  %s", Version)
+	logger.Printf("revision: %s", Revision)
+
+	s := server{
+		logger: logger,
+	}
+	s.ListenAndServe(*listenAddr)
 }
