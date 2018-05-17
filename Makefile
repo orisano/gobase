@@ -60,7 +60,7 @@ Gopkg.lock: Gopkg.toml
 Dockerfile: Dockerfile.tmpl
 	DIR=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
 
-.PHONEY: default bootstrap init world build static-build docker-build test test/small test/medium test/large clean tag
+.PHONEY: default bootstrap init world build static-build docker-build test test/small test/medium test/large clean tag fmt
 
 .cli.deps: Gopkg.toml
 	depinst -make > $@
