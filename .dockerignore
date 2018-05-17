@@ -2,5 +2,6 @@ vendor
 bin
 .cli.deps
 Dockerfile
+Dockerfile.tmpl
 .dockerignore
 .idea
