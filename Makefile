@@ -2,7 +2,7 @@ PROJECT := project
 NAME := name
 VERSION := 0.0.0
 REVISION = $(shell git rev-parse --short HEAD 2>/dev/null)
-GO_LD_FLAGS = -w -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
+GO_LDFLAGS += -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
 SRCS := $(shell git ls-files '*.go')
 
@@ -22,13 +22,12 @@ world: init
 	rm -rf .git
 	git init
 
+prebuild: vendor
+	go build -i ./vendor/...
+
 build: $(SRCS) vendor cli
 	go generate ./...
-	go build -ldflags="$(GO_LD_FLAGS)" -o bin/$(NAME)
-
-static-build: $(SRCS) vendor cli
-	go generate ./...
-	CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo -ldflags="$(GO_LD_FLAGS) -extldflags '-static'" -o bin/$(NAME)
+	go build -ldflags="$(GO_LDFLAGS)" -o bin/$(NAME)
 
 docker-build: Dockerfile Gopkg.toml Gopkg.lock
 	docker build -t $(PROJECT)/$(NAME):$(VERSION) .
@@ -60,7 +59,7 @@ Gopkg.lock: Gopkg.toml
 Dockerfile: Dockerfile.tmpl
 	DIR=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
 
-.PHONEY: default bootstrap init world build static-build docker-build test test/small test/medium test/large clean tag fmt
+.PHONEY: default bootstrap init world prebuild build docker-build test test/small test/medium test/large clean tag fmt
 
 .cli.deps: Gopkg.toml
 	depinst -make > $@
