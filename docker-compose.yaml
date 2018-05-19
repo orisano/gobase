@@ -1,0 +1,9 @@
+version: "3.6"
+services:
+    api:
+        build:
+            context: .
+    db:
+        image: mysql:8.0
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
