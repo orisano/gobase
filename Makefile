@@ -35,6 +35,9 @@ docker-build: Dockerfile Gopkg.toml Gopkg.lock
 docker-run:
 	docker run $(PROJECT)/$(NAME):$(VERSION)
 
+compose-test:
+	docker-compose up --exit-code-from api --abort-on-container-exit --build
+
 test test/small:
 	go test -v -run='^Test([^M][^_]|[^L][^_])' ./...
 
@@ -62,7 +65,7 @@ Gopkg.lock: Gopkg.toml
 Dockerfile: Dockerfile.tmpl
 	DIR=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
 
-.PHONEY: default bootstrap init world prebuild build docker-build docker-run test test/small test/medium test/large clean tag fmt
+.PHONEY: default bootstrap init world prebuild build docker-build docker-run compose-test test test/small test/medium test/large clean tag fmt
 
 .cli.deps: Gopkg.toml
 	depinst -make > $@

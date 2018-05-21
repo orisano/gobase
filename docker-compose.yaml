@@ -3,6 +3,10 @@ services:
     api:
         build:
             context: .
+            target: test
+        command: make test/medium
+        depends_on:
+            - db
     db:
         image: mysql:8.0
         environment:
