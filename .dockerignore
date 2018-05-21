@@ -5,3 +5,4 @@ Dockerfile
 Dockerfile.tmpl
 .dockerignore
 .idea
+docker-compose.yaml
