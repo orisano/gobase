@@ -1,6 +1,7 @@
 PROJECT := project
 NAME := name
 VERSION := 0.0.0
+TAG := $(PROJECT)/$(NAME):$(VERSION)
 REVISION = $(shell git rev-parse --short HEAD 2>/dev/null)
 GO_LDFLAGS += -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
 
@@ -29,13 +30,13 @@ build: $(SRCS) vendor cli
 	go generate ./...
 	go build -ldflags="$(GO_LDFLAGS)" -o bin/$(NAME)
 
-docker-build: Dockerfile Gopkg.toml Gopkg.lock
-	docker build -t $(PROJECT)/$(NAME):$(VERSION) .
+docker-build: Dockerfile
+	docker build -t $(TAG) .
 
 docker-run:
-	docker run $(PROJECT)/$(NAME):$(VERSION)
+	docker run $(TAG)
 
-compose-test:
+compose-test: docker-compose.yaml
 	docker-compose up --exit-code-from api --abort-on-container-exit --build
 
 test test/small:
@@ -63,7 +64,9 @@ Gopkg.lock: Gopkg.toml
 	dep ensure -no-vendor
 
 Dockerfile: Dockerfile.tmpl
-	DIR=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
+	PKG_PATH=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
+
+docker-compose.yaml: Dockerfile
 
 .PHONY: default bootstrap init world prebuild build docker-build docker-run compose-test test test/small test/medium test/large clean tag fmt
 
