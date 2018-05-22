@@ -73,6 +73,6 @@ docker-compose.yaml: Dockerfile
 .cli.deps: Gopkg.toml
 	depinst -make > $@
 
-ifeq (,$(findstring $(MAKECMDGOALS),init world bootstrap))
+ifeq (,$(findstring $(MAKECMDGOALS),bootstrap init world))
 -include .cli.deps
 endif
