@@ -4,6 +4,7 @@ VERSION := 0.0.0
 TAG := $(PROJECT)/$(NAME):$(VERSION)
 REVISION = $(shell git rev-parse --short HEAD 2>/dev/null)
 GO_LDFLAGS += -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
+DOCKER_BUILD_ARGS += -t $(TAG)
 
 SRCS := $(shell git ls-files '*.go')
 
@@ -31,7 +32,7 @@ build: $(SRCS) vendor cli
 	go build -ldflags="$(GO_LDFLAGS)" -o bin/$(NAME)
 
 docker-build: Dockerfile
-	docker build -t $(TAG) .
+	docker build $(DOCKER_BUILD_ARGS) .
 
 docker-run:
 	docker run $(TAG)
