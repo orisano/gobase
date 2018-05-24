@@ -27,6 +27,6 @@ RUN make test
 FROM alpine:3.7
 RUN apk add --no-cache ca-certificates
 COPY --from=test /etc/mime.types /etc/localtime /etc/
-COPY --from=build /go/src/${PKG_PATH}/bin/${NAME} /bin/${NAME}
+COPY --from=build /go/src/${PKG_PATH}/bin/${NAME} /bin/
 ENTRYPOINT ["/bin/${NAME}"]
 __EOF__
