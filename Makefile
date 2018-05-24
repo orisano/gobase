@@ -10,51 +10,69 @@ SRCS := $(shell git ls-files '*.go')
 
 export PATH := $(PWD)/bin:$(PATH)
 
+.PHONY: default
 default: build
 
+.PHONY: bootstrap
 bootstrap:
 	go get -u golang.org/x/tools/cmd/goimports
 	go get -u github.com/golang/dep/cmd/dep
 	go get -u github.com/orisano/depinst
 
+.PHONY: init
 init: bootstrap
 	dep init
 
+.PHONY: world
 world: init
 	rm -rf .git
 	git init
 
+.PHONY: prebuild
 prebuild: vendor
 	go build -i ./vendor/...
 
+.PHONY: build
 build: $(SRCS) vendor cli
 	go generate ./...
 	go build -ldflags="$(GO_LDFLAGS)" -o bin/$(NAME)
 
+.PHONY: docker-build
 docker-build: Dockerfile
 	docker build $(DOCKER_BUILD_ARGS) .
 
+.PHONY: docker-run
 docker-run:
 	docker run $(TAG)
 
+.PHONY: compose-test
 compose-test: docker-compose.yaml
 	docker-compose up --exit-code-from api --abort-on-container-exit --build
 
-test test/small:
+.PHONY: test
+test: test/small
+
+.PHONY: test/small
+test/small:
 	go test -v -run='^Test([^M][^_]|[^L][^_])' ./...
 
+.PHONY: test/medium
 test/medium:
 	go test -v -run='^TestM_' ./...
 
+.PHONY: test/large
 test/large:
 	go test -v -run='^TestL_' ./...
 
+.PHONY: clean
 clean:
 	rm -rf bin vendor
 
+.PHONY: tag
 tag:
 	git tag $(VERSION)
 
+.PHONY: fmt
 fmt:
 	goimports -w $(SRCS)
 
@@ -68,8 +86,6 @@ Dockerfile: Dockerfile.tmpl
 	PKG_PATH=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
 
 docker-compose.yaml: Dockerfile
-
-.PHONY: default bootstrap init world prebuild build docker-build docker-run compose-test test test/small test/medium test/large clean tag fmt
 
 .cli.deps: Gopkg.toml
 	depinst -make > $@
