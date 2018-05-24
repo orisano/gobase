@@ -22,7 +22,7 @@ bootstrap:
 	go get -u github.com/Songmu/make2help/cmd/make2help
 
 .PHONY: init
-## initialize dependencies
+## initialize project
 init: bootstrap
 	dep init
 
