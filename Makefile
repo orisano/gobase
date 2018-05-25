@@ -111,6 +111,10 @@ docker-compose.yaml: Dockerfile
 .cli.deps: Gopkg.toml
 	@depinst -make > $@
 
+Gopkg.toml:
+	@echo error: Gopkg.toml not found. please run \"make init\" or \"make world\"
+	@exit 1
+
 ifeq (,$(findstring $(MAKECMDGOALS),bootstrap init world))
 -include .cli.deps
 endif
