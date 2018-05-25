@@ -43,6 +43,8 @@ func (s *server) healthz() http.Handler {
 func (s *server) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/healthz", s.healthz())
+	// add your handlers
+
 	return mux
 }
 
