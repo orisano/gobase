@@ -22,4 +22,4 @@ The boilerplate features:
 MIT
 
 ## Author
-@orisano (Nao YONASHIRO)
+Nao YONASHIRO (@orisano)
