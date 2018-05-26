@@ -24,6 +24,7 @@ bootstrap:
 .PHONY: init
 ## initialize project
 init: bootstrap
+	@rm README.md
 	dep init
 
 .PHONY: world
