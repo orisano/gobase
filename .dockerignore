@@ -6,3 +6,4 @@ Dockerfile.tmpl
 .dockerignore
 .idea
 docker-compose.yaml
+README.md
