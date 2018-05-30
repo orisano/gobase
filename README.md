@@ -9,7 +9,7 @@ $ make init # or make world
 $ make help
 ```
 
-## Feature
+## Features
 The boilerplate features:
  * cache friendly docker image template
  * multi stage build 
