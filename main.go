@@ -123,12 +123,13 @@ func logging(logger *log.Logger) func(http.Handler) http.Handler {
 func tracing(nextRequestID func() string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			requestID := req.Header.Get("Request-Id")
+			const requestIDName = "Request-Id"
+			requestID := req.Header.Get(requestIDName)
 			if requestID == "" {
 				requestID = nextRequestID()
 			}
 			ctx := context.WithValue(req.Context(), requestIDKey, requestID)
-			w.Header().Set("Request-Id", requestID)
+			w.Header().Set(requestIDName, requestID)
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}
