@@ -1,5 +1,5 @@
 cat << __EOF__
-FROM golang:1.10-alpine3.7 AS build
+FROM golang:1.10-alpine3.8 AS build
 
 ENV DEP_VERSION 0.4.1
 
@@ -24,7 +24,7 @@ ARG TZ=GMT0
 RUN cp /usr/share/zoneinfo/\${TZ} /etc/localtime
 RUN make test
 
-FROM alpine:3.7
+FROM alpine:3.8
 RUN apk add --no-cache ca-certificates
 COPY --from=test /etc/mime.types /etc/localtime /etc/
 COPY --from=build /go/src/${PKG_PATH}/bin/${NAME} /bin/
