@@ -19,6 +19,7 @@ bootstrap:
 	go get -u golang.org/x/tools/cmd/goimports
 	go get -u github.com/golang/dep/cmd/dep
 	go get -u github.com/orisano/depinst
+	go get -u github.com/orisano/minid
 	go get -u github.com/Songmu/make2help/cmd/make2help
 
 .PHONY: init
@@ -47,7 +48,7 @@ build: $(SRCS) vendor cli
 .PHONY: docker-build
 ## build docker image
 docker-build: Dockerfile
-	docker build $(DOCKER_BUILD_OPTS) .
+	minid | docker build $(DOCKER_BUILD_OPTS) -f - .
 
 .PHONY: docker-run
 ## run docker image
