@@ -5,9 +5,14 @@ ENV DEP_VERSION 0.5.0
 
 WORKDIR /go/src/${PKG_PATH}
 
-RUN apk add --no-cache git make mailcap tzdata
+RUN apk add --no-cache git mailcap make
 RUN wget -O /usr/local/bin/dep https://github.com/golang/dep/releases/download/v\${DEP_VERSION}/dep-linux-amd64 && chmod +x /usr/local/bin/dep
 RUN wget -O /usr/local/bin/depinst https://github.com/orisano/depinst/releases/download/1.0.1/depinst-linux-amd64 && chmod +x /usr/local/bin/depinst
+
+ARG TZ=GMT0
+RUN apk add --no-cache tzdata \\
+    && cp /usr/share/zoneinfo/\${TZ} /etc/localtime \\
+    && apk del tzdata
 
 COPY Gopkg.lock Gopkg.toml ./
 RUN dep ensure -vendor-only && rm -rf /go/pkg/dep/sources
@@ -20,8 +25,6 @@ COPY . .
 RUN make build
 
 FROM build as test
-ARG TZ=GMT0
-RUN cp /usr/share/zoneinfo/\${TZ} /etc/localtime
 RUN make test
 
 FROM alpine:3.8
