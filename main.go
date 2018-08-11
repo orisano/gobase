@@ -33,7 +33,7 @@ type server struct {
 func (s *server) healthz() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if atomic.LoadInt32(&s.healthy) == 1 {
-			w.WriteHeader(http.StatusNoContent)
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 		w.WriteHeader(http.StatusServiceUnavailable)
