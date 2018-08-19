@@ -3,7 +3,7 @@ NAME := name
 TAG := $(PROJECT)/$(NAME)
 DOCKER_BUILD_OPTS += -t $(TAG)
 
-SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go' -print)
+SRCS := $(shell go list -f '{{ join .GoFiles " " }}' ./...)
 
 export PATH := $(PWD)/bin:$(PATH)
 
