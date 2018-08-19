@@ -1,12 +1,9 @@
 PROJECT := project
 NAME := name
-VERSION := 0.0.0
-TAG := $(PROJECT)/$(NAME):$(VERSION)
-REVISION = $(shell git rev-parse --short HEAD 2>/dev/null)
-GO_LDFLAGS += -X 'main.Version=$(VERSION)' -X 'main.Revision=$(REVISION)'
+TAG := $(PROJECT)/$(NAME)
 DOCKER_BUILD_OPTS += -t $(TAG)
 
-SRCS := $(shell git ls-files '*.go')
+SRCS := $(shell find . -type d -name vendor -prune -o -type f -name '*.go' -print)
 
 export PATH := $(PWD)/bin:$(PATH)
 
@@ -83,11 +80,6 @@ test/large:
 clean:
 	rm -rf bin vendor
 
-.PHONY: tag
-## tag version to HEAD
-tag:
-	git tag $(VERSION)
-
 .PHONY: fmt
 ## format source code
 fmt:
@@ -98,18 +90,21 @@ fmt:
 help:
 	@make2help $(MAKEFILE_LIST)
 
-vendor: Gopkg.toml Gopkg.lock
+vendor: Gopkg.lock
 	dep ensure -vendor-only
 
-Gopkg.lock: Gopkg.toml
+Gopkg.lock: Gopkg.toml .imports.txt
 	dep ensure -no-vendor
+
+.imports.txt: $(SRCS)
+	@go list -f '{{ join .Imports "\n" }}' ./... > $@
 
 Dockerfile: Dockerfile.tmpl
 	@PKG_PATH=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
 
 docker-compose.yaml: Dockerfile
 
-.cli.deps: Gopkg.toml
+cli.mk: Gopkg.toml
 	@depinst -make > $@
 
 Gopkg.toml:
@@ -117,5 +112,5 @@ Gopkg.toml:
 	@exit 1
 
 ifeq (,$(findstring $(MAKECMDGOALS),bootstrap init world))
--include .cli.deps
+-include cli.mk
 endif

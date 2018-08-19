@@ -14,11 +14,6 @@ import (
 	"time"
 )
 
-var (
-	Version  string
-	Revision string
-)
-
 type key int
 
 const (
@@ -140,8 +135,6 @@ func main() {
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
-	logger.Printf("version:  %s", Version)
-	logger.Printf("revision: %s", Revision)
 
 	s := server{
 		logger: logger,

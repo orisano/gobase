@@ -1,9 +1,11 @@
 vendor
 bin
-.cli.deps
+cli.mk
+.imports.txt
 Dockerfile
 Dockerfile.tmpl
 .dockerignore
 .idea
 docker-compose.yaml
 README.md
+.git
