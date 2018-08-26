@@ -1,7 +1,6 @@
 vendor
 bin
 cli.mk
-.imports.txt
 Dockerfile
 Dockerfile.tmpl
 .dockerignore

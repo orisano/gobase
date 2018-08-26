@@ -90,14 +90,10 @@ fmt:
 help:
 	@make2help $(MAKEFILE_LIST)
 
-vendor: Gopkg.lock
-	dep ensure -vendor-only
-
-Gopkg.lock: Gopkg.toml .imports.txt
-	dep ensure -no-vendor
-
-.imports.txt: $(SRCS)
-	@go list -f '{{ join .Imports "\n" }}' ./... > $@
+.PHONY: vendor
+## sync vendor directory
+vendor:
+	dep check || dep ensure
 
 Dockerfile: Dockerfile.tmpl
 	@PKG_PATH=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
