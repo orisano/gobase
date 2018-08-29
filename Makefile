@@ -107,6 +107,6 @@ Gopkg.toml:
 	@echo error: Gopkg.toml not found. please run \"make init\" or \"make world\"
 	@exit 1
 
-ifeq (,$(findstring $(MAKECMDGOALS),bootstrap init world))
+ifeq (,$(findstring $(MAKECMDGOALS),bootstrap init world help))
 -include cli.mk
 endif
