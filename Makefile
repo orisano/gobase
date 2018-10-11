@@ -49,7 +49,7 @@ docker-build: Dockerfile
 .PHONY: docker-run
 ## run docker image
 docker-run:
-	docker run $(TAG)
+	docker run --rm $(TAG)
 
 .PHONY: compose-test
 ## run test on docker-compose
