@@ -103,13 +103,15 @@ func compose(middlewares ...func(http.Handler) http.Handler) func(http.Handler) 
 func logging(logger *log.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			defer func() {
-				requestID, ok := req.Context().Value(requestIDKey).(string)
-				if !ok {
-					requestID = "unknown"
-				}
-				logger.Println(requestID, req.Method, req.URL.Path, req.RemoteAddr, req.UserAgent())
-			}()
+			if req.URL.Path != "/healthz" {
+				defer func() {
+					requestID, ok := req.Context().Value(requestIDKey).(string)
+					if !ok {
+						requestID = "unknown"
+					}
+					logger.Println(requestID, req.Method, req.URL.Path, req.RemoteAddr, req.UserAgent())
+				}()
+			}
 			next.ServeHTTP(w, req)
 		})
 	}
