@@ -132,6 +132,22 @@ func tracing(nextRequestID func() string) func(http.Handler) http.Handler {
 	}
 }
 
+func cors(origin string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+			// for preflight
+			if req.Method == http.MethodOptions {
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+				w.WriteHeader(http.StatusOK)
+			} else {
+				next.ServeHTTP(w, req)
+			}
+		})
+	}
+}
+
 func main() {
 	listenAddr := flag.String("l", ":5000", "server listen address")
 	flag.Parse()
