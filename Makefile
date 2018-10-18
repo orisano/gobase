@@ -1,11 +1,6 @@
 PROJECT := project
 NAME := name
 TAG := $(PROJECT)/$(NAME)
-DOCKER_BUILD_OPTS += -t $(TAG)
-
-SRCS := $(shell go list -f '{{ join .GoFiles " " }}' ./...)
-
-export PATH := $(PWD)/bin:$(PATH)
 
 .PHONY: default
 default: build
@@ -35,16 +30,20 @@ world: init
 prebuild: vendor
 	go build -i ./vendor/...
 
+.PHONY: gen
+## run go generate
+gen: cli
+	go generate ./...
+
 .PHONY: build
 ## build application (default)
-build: $(SRCS) vendor cli
-	go generate ./...
-	go build -ldflags="$(GO_LDFLAGS)" -o bin/$(NAME)
+build: gen
+	go build -o bin/$(NAME)
 
 .PHONY: docker-build
 ## build docker image
 docker-build: Dockerfile
-	docker build $(DOCKER_BUILD_OPTS) .
+	DOCKER_BUILDKIT=1 docker build $(DOCKER_BUILD_OPTS) -t $(TAG) .
 
 .PHONY: docker-run
 ## run docker image
@@ -80,32 +79,33 @@ test/large:
 clean:
 	rm -rf bin vendor
 
-.PHONY: fmt
-## format source code
-fmt:
-	goimports -w $(SRCS)
-
 .PHONY: help
 ## show help
 help:
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: vendor
-## sync vendor directory
-vendor:
+.PHONY: pre-push
+## pre push hooks
+pre-push:
 	dep check || dep ensure
 
 Dockerfile: Dockerfile.tmpl
-	@PKG_PATH=$(subst $(shell go env GOPATH)/src/,,$(PWD)) NAME=$(NAME) sh $< > $@
+	@PKG_PATH=$(shell go list) NAME=$(NAME) sh $< > $@
 
 docker-compose.yaml: Dockerfile
 
 cli.mk: Gopkg.toml
 	@depinst -make > $@
 
+Gopkg.lock: Gopkg.toml
+	dep ensure -no-vendor
+
 Gopkg.toml:
 	@echo error: Gopkg.toml not found. please run \"make init\" or \"make world\"
 	@exit 1
+
+vendor: Gopkg.lock
+	dep ensure -vendor-only
 
 ifeq (,$(findstring $(MAKECMDGOALS),bootstrap init world help))
 -include cli.mk
