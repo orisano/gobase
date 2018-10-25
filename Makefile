@@ -97,6 +97,9 @@ docker-compose.yaml: Dockerfile
 cli.mk: Gopkg.toml
 	@depinst -make > $@
 
+cli-vendor.mk: Gopkg.toml
+	@depinst -list | awk '{print "vendor/" $$0 ": vendor\n"}' > $@
+
 Gopkg.lock: Gopkg.toml
 	dep ensure -no-vendor
 
@@ -109,4 +112,5 @@ vendor: Gopkg.lock
 
 ifeq (,$(findstring $(MAKECMDGOALS),bootstrap init world help))
 -include cli.mk
+-include cli-vendor.mk
 endif

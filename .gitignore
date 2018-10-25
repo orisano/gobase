@@ -1,3 +1,8 @@
 vendor
 bin
 cli.mk
+cli-vendor.mk
+.git
+.dockerignore
+Dockerfile
+docker-compose.yaml

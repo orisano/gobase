@@ -8,3 +8,4 @@ Dockerfile.tmpl
 docker-compose.yaml
 README.md
 .git
+.gitignore
