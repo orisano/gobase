@@ -1,4 +1,4 @@
-This project is go web application boilerplate.
+gobase is a api server boilerplate.
 
 ## How to use
 ```bash
