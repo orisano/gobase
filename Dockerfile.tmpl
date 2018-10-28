@@ -18,7 +18,6 @@ COPY Gopkg.lock Gopkg.toml ./
 RUN dep ensure -vendor-only && rm -rf /go/pkg/dep/sources
 
 ENV CGO_ENABLED=0
-ENV GO_LDFLAGS="-extldflags='-static'"
 RUN go build -i ./vendor/...
 
 COPY . .
@@ -27,9 +26,11 @@ RUN make build
 FROM build as test
 RUN make test
 
-FROM alpine:3.8
+FROM alpine:3.8 as runtime
+ENV GOROOT=/go
 RUN apk add --no-cache ca-certificates
-COPY --from=test /etc/mime.types /etc/localtime /etc/
+COPY --from=build /etc/mime.types /etc/localtime /etc/
+COPY --from=build /usr/local/go/lib/time/zoneinfo.zip /go/lib/time/
 COPY --from=build /go/src/${PKG_PATH}/bin/${NAME} /bin/
 ENTRYPOINT ["/bin/${NAME}"]
 __EOF__
