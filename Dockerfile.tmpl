@@ -10,6 +10,7 @@ RUN wget -O /usr/local/bin/dep https://github.com/golang/dep/releases/download/v
 RUN wget -O /usr/local/bin/depinst https://github.com/orisano/depinst/releases/download/1.0.1/depinst-linux-amd64 && chmod +x /usr/local/bin/depinst
 
 ARG TZ=GMT0
+ENV TZ=\${TZ}
 RUN apk add --no-cache tzdata \\
     && cp /usr/share/zoneinfo/\${TZ} /etc/localtime \\
     && apk del tzdata
