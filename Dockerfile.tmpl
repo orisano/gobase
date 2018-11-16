@@ -1,33 +1,33 @@
 cat << __EOF__
-FROM golang:1.11-alpine3.8 AS build
+ARG ALPINE_TAG=3.8
+ARG GOLANG_TAG=1.11-alpine\${ALPINE_TAG}
 
-ENV DEP_VERSION 0.5.0
-
+FROM golang:\${GOLANG_TAG} AS vendor
 WORKDIR /go/src/${PKG_PATH}
-
-RUN apk add --no-cache git mailcap make
+ENV DEP_VERSION 0.5.0
+RUN apk add --no-cache git
 RUN wget -O /usr/local/bin/dep https://github.com/golang/dep/releases/download/v\${DEP_VERSION}/dep-linux-amd64 && chmod +x /usr/local/bin/dep
-RUN wget -O /usr/local/bin/depinst https://github.com/orisano/depinst/releases/download/1.0.1/depinst-linux-amd64 && chmod +x /usr/local/bin/depinst
-
-ARG TZ=GMT0
-ENV TZ=\${TZ}
-RUN apk add --no-cache tzdata \\
-    && cp /usr/share/zoneinfo/\${TZ} /etc/localtime \\
-    && apk del tzdata
-
 COPY Gopkg.lock Gopkg.toml ./
 RUN dep ensure -vendor-only && rm -rf /go/pkg/dep/sources
 
-ENV CGO_ENABLED=0
-RUN go build -i ./vendor/...
-
+FROM golang:\${GOLANG_TAG} AS build
+WORKDIR /go/src/${PKG_PATH}
+RUN apk add --no-cache mailcap make
+RUN wget -O /usr/local/bin/depinst https://github.com/orisano/depinst/releases/download/1.0.1/depinst-linux-amd64 && chmod +x /usr/local/bin/depinst
+ENV TZ=GMT0
+RUN apk add --no-cache tzdata \\
+    && cp /usr/share/zoneinfo/\${TZ} /etc/localtime \\
+    && apk del tzdata
+COPY Makefile Gopkg.toml Gopkg.lock ./
+COPY --from=vendor /go/src/${PKG_PATH}/vendor ./vendor
+RUN make cli
 COPY . .
-RUN make build
+RUN CGO_ENABLED=0 make build
 
-FROM build as test
+FROM build AS test
 RUN make test
 
-FROM alpine:3.8 as runtime
+FROM alpine:3.8 AS app
 ENV GOROOT=/go
 RUN apk add --no-cache ca-certificates
 COPY --from=build /etc/mime.types /etc/localtime /etc/
