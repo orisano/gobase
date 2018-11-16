@@ -33,7 +33,7 @@ prebuild: vendor
 .PHONY: gen
 ## run go generate
 gen: cli
-	go generate ./...
+	PATH=$$(pwd)/bin:$$PATH go generate ./...
 
 .PHONY: build
 ## build application (default)
@@ -109,6 +109,7 @@ Gopkg.toml:
 
 vendor: Gopkg.lock
 	dep ensure -vendor-only
+	@touch vendor
 
 ifeq (,$(findstring $(MAKECMDGOALS),bootstrap init world help))
 -include cli.mk
