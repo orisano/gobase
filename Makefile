@@ -25,11 +25,6 @@ world: init
 	rm -rf .git
 	git init
 
-.PHONY: prebuild
-## prebuild vendored libraries (for speedup of build)
-prebuild: vendor
-	go build -i ./vendor/...
-
 .PHONY: gen
 ## run go generate
 gen: cli
