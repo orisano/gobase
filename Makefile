@@ -45,11 +45,6 @@ build: gen
 docker-build: Dockerfile
 	DOCKER_BUILDKIT=1 docker build $(DOCKER_BUILD_OPTS) -t $(TAG) .
 
-.PHONY: docker-run
-## run docker image
-docker-run:
-	docker run --rm $(TAG)
-
 .PHONY: compose-test
 ## run test on docker-compose
 compose-test: docker-compose.yaml
