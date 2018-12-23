@@ -2,16 +2,17 @@ PROJECT := project
 NAME := name
 TAG := $(PROJECT)/$(NAME)
 
+export PATH := $$(pwd)/tools/bin:$(PATH)
+
 .PHONY: default
 default: build
 
 .PHONY: bootstrap
 ## setup required command line tools for make
 bootstrap:
-	go get -u golang.org/x/tools/cmd/goimports
-	go get -u github.com/golang/dep/cmd/dep
-	go get -u github.com/orisano/depinst
-	go get -u github.com/Songmu/make2help/cmd/make2help
+	go get github.com/golang/dep/cmd/dep
+	go get github.com/orisano/depinst
+	go get github.com/Songmu/make2help/cmd/make2help
 
 .PHONY: init
 ## initialize project
@@ -28,7 +29,7 @@ world: init
 .PHONY: gen
 ## run go generate
 gen: cli
-	PATH=$$(pwd)/bin:$$PATH go generate ./...
+	go generate ./...
 
 .PHONY: build
 ## build application (default)
@@ -64,11 +65,6 @@ test/medium:
 test/large:
 	go test -v -run='^TestL_' ./...
 
-.PHONY: clean
-## clean in the directory
-clean:
-	rm -rf bin vendor
-
 .PHONY: help
 ## show help
 help:
@@ -84,24 +80,3 @@ Dockerfile: Dockerfile.tmpl
 
 docker-compose.yaml: Dockerfile
 
-cli.mk: Gopkg.toml
-	@depinst -make > $@
-
-cli-vendor.mk: Gopkg.toml
-	@depinst -list | awk '{print "vendor/" $$0 ": vendor\n"}' > $@
-
-Gopkg.lock: Gopkg.toml
-	dep ensure -no-vendor
-
-Gopkg.toml:
-	@echo error: Gopkg.toml not found. please run \"make init\" or \"make world\"
-	@exit 1
-
-vendor: Gopkg.lock
-	dep ensure -vendor-only
-	@touch vendor
-
-ifeq (,$(findstring $(MAKECMDGOALS),bootstrap init world help))
--include cli.mk
--include cli-vendor.mk
-endif
