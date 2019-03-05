@@ -1,7 +1,7 @@
 cat << __EOF__
 # syntax = docker/dockerfile:1.0-experimental
-ARG ALPINE_TAG=3.8
-ARG GOLANG_TAG=1.11-alpine\${ALPINE_TAG}
+ARG ALPINE_TAG=3.9
+ARG GOLANG_TAG=1.12-alpine\${ALPINE_TAG}
 
 FROM golang:\${GOLANG_TAG} AS vendor
 WORKDIR /go/src/${PKG_PATH}
@@ -21,14 +21,13 @@ RUN apk add --no-cache tzdata \\
     && apk del tzdata
 COPY Makefile Gopkg.toml Gopkg.lock ./
 COPY --from=vendor /go/src/${PKG_PATH}/vendor ./vendor
-RUN --mount=type=cache,target=~/.cache/go-build make cli
 COPY . .
 RUN --mount=type=cache,target=~/.cache/go-build CGO_ENABLED=0 make build
 
 FROM build AS test
 RUN --mount=type=cache,target=~/.cache/go-build make test
 
-FROM alpine:3.8 AS app
+FROM alpine:3.9 AS app
 ENV GOROOT=/go
 RUN apk add --no-cache ca-certificates
 COPY --from=build /etc/mime.types /etc/localtime /etc/

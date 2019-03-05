@@ -28,7 +28,7 @@ world: init
 
 .PHONY: gen
 ## run go generate
-gen: cli
+gen:
 	go generate ./...
 
 .PHONY: build
