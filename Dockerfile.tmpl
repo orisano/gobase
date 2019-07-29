@@ -1,9 +1,8 @@
 cat << __EOF__
 # syntax = docker/dockerfile:1.0-experimental
-ARG ALPINE_TAG=3.9
-ARG GOLANG_TAG=1.12-alpine\${ALPINE_TAG}
+FROM golang:1.12-alpine3.10 AS build-base
 
-FROM golang:\${GOLANG_TAG} AS vendor
+FROM build-base AS vendor
 WORKDIR /go/src/${PKG_PATH}
 ENV DEP_VERSION 0.5.0
 RUN apk add --no-cache git
@@ -11,7 +10,7 @@ RUN wget -O /usr/local/bin/dep https://github.com/golang/dep/releases/download/v
 COPY Gopkg.lock Gopkg.toml ./
 RUN dep ensure -vendor-only && rm -rf /go/pkg/dep/sources
 
-FROM golang:\${GOLANG_TAG} AS build
+FROM build-base AS build
 WORKDIR /go/src/${PKG_PATH}
 RUN apk add --no-cache mailcap make
 RUN wget -O /usr/local/bin/depinst https://github.com/orisano/depinst/releases/download/1.0.1/depinst-linux-amd64 && chmod +x /usr/local/bin/depinst
@@ -27,7 +26,7 @@ RUN --mount=type=cache,target=~/.cache/go-build CGO_ENABLED=0 make build
 FROM build AS test
 RUN --mount=type=cache,target=~/.cache/go-build make test
 
-FROM alpine:3.9 AS app
+FROM alpine:3.10 AS app
 ENV GOROOT=/go
 RUN apk add --no-cache ca-certificates
 COPY --from=build /etc/mime.types /etc/localtime /etc/
