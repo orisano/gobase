@@ -8,7 +8,7 @@ ENV DEP_VERSION 0.5.0
 RUN apk add --no-cache git
 RUN wget -O /usr/local/bin/dep https://github.com/golang/dep/releases/download/v\${DEP_VERSION}/dep-linux-amd64 && chmod +x /usr/local/bin/dep
 COPY Gopkg.lock Gopkg.toml ./
-RUN dep ensure -vendor-only && rm -rf /go/pkg/dep/sources
+RUN --mount=type=cache,target=/go/pkg/dep/sources dep ensure -vendor-only
 
 FROM build-base AS build
 WORKDIR /go/src/${PKG_PATH}
