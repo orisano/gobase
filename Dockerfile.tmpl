@@ -1,6 +1,6 @@
 cat << __EOF__
 # syntax = docker/dockerfile:1.0-experimental
-FROM golang:1.12-alpine3.10 AS build-base
+FROM golang:1.13-alpine3.10 AS build-base
 
 FROM build-base AS vendor
 WORKDIR /go/src/${PKG_PATH}
