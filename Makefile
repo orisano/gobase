@@ -44,7 +44,7 @@ docker-build: Dockerfile
 .PHONY: compose-test
 ## run test on docker-compose
 compose-test: docker-compose.yaml
-	docker-compose up --exit-code-from api --abort-on-container-exit --build
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose up --exit-code-from api --abort-on-container-exit --build
 
 .PHONY: test
 ## alias of test/small
