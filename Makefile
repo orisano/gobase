@@ -46,37 +46,12 @@ docker-build: Dockerfile
 compose-test: docker-compose.yaml
 	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker-compose up --exit-code-from api --abort-on-container-exit --build
 
-.PHONY: test
-## alias of test/small
-test: test/small
-
-.PHONY: test/small
-## run small-test
-test/small:
-	go test -v -run='^Test([^M][^_]|[^L][^_])' ./...
-
-.PHONY: test/medium
-## run medium-test
-test/medium:
-	go test -v -run='^TestM_' ./...
-
-.PHONY: test/large
-## run large-test
-test/large:
-	go test -v -run='^TestL_' ./...
-
 .PHONY: help
 ## show help
 help:
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: pre-push
-## pre push hooks
-pre-push:
-	dep check || dep ensure
-
 Dockerfile: Dockerfile.tmpl
 	@PKG_PATH=$(shell go list) NAME=$(NAME) sh $< > $@
 
 docker-compose.yaml: Dockerfile
-
