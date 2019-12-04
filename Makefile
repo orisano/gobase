@@ -1,8 +1,4 @@
-PROJECT := project
-NAME := name
-TAG := $(PROJECT)/$(NAME)
-
-export PATH := $$(pwd)/tools/bin:$(PATH)
+SHELL := PATH=$(PWD)/tools/bin:$(PATH) $(SHELL)
 
 .PHONY: default
 default: build
@@ -10,21 +6,7 @@ default: build
 .PHONY: bootstrap
 ## setup required command line tools for make
 bootstrap:
-	go get github.com/golang/dep/cmd/dep
-	go get github.com/orisano/depinst
-	go get github.com/Songmu/make2help/cmd/make2help
-
-.PHONY: init
-## initialize project
-init: bootstrap
-	@rm README.md
-	dep init
-
-.PHONY: world
-## initialize repository
-world: init
-	rm -rf .git
-	git init
+	GO111MODULE=off go get github.com/Songmu/make2help/cmd/make2help
 
 .PHONY: gen
 ## run go generate
@@ -34,12 +16,12 @@ gen:
 .PHONY: build
 ## build application (default)
 build: gen
-	go build -o bin/$(NAME)
+	go build -o bin/app .
 
 .PHONY: docker-build
 ## build docker image
 docker-build: Dockerfile
-	DOCKER_BUILDKIT=1 docker build $(DOCKER_BUILD_OPTS) -t $(TAG) .
+	DOCKER_BUILDKIT=1 docker build .
 
 .PHONY: compose-test
 ## run test on docker-compose
@@ -50,8 +32,3 @@ compose-test: docker-compose.yaml
 ## show help
 help:
 	@make2help $(MAKEFILE_LIST)
-
-Dockerfile: Dockerfile.tmpl
-	@PKG_PATH=$(shell go list) NAME=$(NAME) sh $< > $@
-
-docker-compose.yaml: Dockerfile
