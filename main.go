@@ -149,7 +149,11 @@ func cors(origin string) func(http.Handler) http.Handler {
 }
 
 func main() {
-	listenAddr := flag.String("l", ":5000", "server listen address")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5000"
+	}
+	listenAddr := flag.String("l", ":"+port, "server listen address")
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
